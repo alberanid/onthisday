@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """onthisday.py - what REALLY happened in the world, on this day."""
 
+import os
 import re
 import time
 import json
+import random
 import argparse
 import urllib.error
 import urllib.request
-import random
 import markovify
 
 EVENTS_URL = 'https://%s.wikipedia.org/api/rest_v1/feed/onthisday/events'
@@ -16,7 +17,6 @@ invalidChars = re.compile('[\[\]\'"\(\)]')
 
 def getEvents(url=None, date=None):
     """Return a list of {'year': '1999', 'text': 'an event'} objects."""
-    print(url)
     if date is None:
         date = time.strftime('%m/%d')
     if url is None:
@@ -86,12 +86,12 @@ if __name__ == '__main__':
     parser.add_argument('--date', default=today, help='month/day to use (default: today)')
     parser.add_argument('--how-many', type=int, default=5, help='how many events to generate (default: 5)')
     parser.add_argument('--chars', type=int, default=200, help='maximum length of each event, excluding the date (default: 200)')
+    parser.add_argument('--sep', default=os.linesep + os.linesep, help='lines separator (default: \\n\\n)')
     args = parser.parse_args()
     url = args.url
     if not url:
         url = EVENTS_URL % args.lang
     events = getEvents(url=url, date=args.date)
     onThisDay = markovShuffle(events, howMany=args.how_many, chars=args.chars)
-    for event in onThisDay:
-        print(event)
+    print(args.sep.join(onThisDay))
 
