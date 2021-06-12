@@ -4,7 +4,7 @@
 Build it with: docker build -t telegram-onthisday .
 Run it with something like: docker run -ti --rm -e EVENTS_TOKEN=your-telegram-token telegram-onthisday
 
-Copyright 2019 Davide Alberani <da@erlug.linux.it> Apache 2.0 license
+Copyright 2019-2021 Davide Alberani <da@erlug.linux.it> Apache 2.0 license
 """
 
 import os
@@ -45,18 +45,19 @@ def getEvents(day=None):
     return stdout
 
 
-def events(bot, update, args=None):
+def events(bot, update):
     day = None
-    if args and args[0]:
-        day = args[0].strip()
+    txts = bot.message.text.split()
+    if len(txts) == 2:
+        day = txts[1]
     events = getEvents(day)
-    logging.info('%s wants some news; serving:\n%s' % (update.message.from_user.name, events))
-    update.message.reply_text(events)
+    logging.info('%s wants some news; serving:\n%s' % (bot.effective_user.username, events))
+    bot.message.reply_text(events)
 
 
 def about(bot, update):
-    logging.info('%s required more info' % update.message.from_user.name)
-    update.message.reply_text('See https://github.com/alberanid/onthisday\n\n/today to use the current date\n\n/date 07/30 for July 30')
+    logging.info('%s required more info' % bot.effective_user.username)
+    bot.message.reply_text('See https://github.com/alberanid/onthisday\n\n/today to use the current date\n\n/date 07/30 for July 30')
 
 
 if __name__ == '__main__':
