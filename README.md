@@ -19,7 +19,7 @@ Requires https://github.com/jsvine/markovify
 
 # License
 
-Copyright 2019-2021 Davide Alberani <da@erlug.linux.it>
+Copyright 2019-2021 Davide Alberani <da@mimante.net>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

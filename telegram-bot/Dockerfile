@@ -1,6 +1,6 @@
 FROM alpine
 LABEL \
-	maintainer="Davide Alberani <da@erlug.linux.it>"
+	maintainer="Davide Alberani <da@mimante.net>"
 
 RUN \
 	apk add --no-cache git python3 py3-cffi py3-six py3-requests py3-cryptography py3-pip && \
