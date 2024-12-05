@@ -6,8 +6,6 @@ import sys
 import subprocess
 from mastodon import Mastodon
 
-API_URL = 'https://botsin.space/'
-
 sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf8', buffering=1)
 
 def getEvents():
@@ -29,10 +27,10 @@ def getEvents():
     return stdout
 
 
-def serve(token):
+def serve(api_url, token):
     events = getEvents()
     print('On this day:\n\n%s' % events)
-    mastodon = Mastodon(access_token=token, api_base_url=API_URL)
+    mastodon = Mastodon(access_token=token, api_base_url=api_url)
     mastodon.status_post(events)
 
 
@@ -40,4 +38,8 @@ if __name__ == '__main__':
     if 'EVENTS_TOKEN' not in os.environ:
         print("Please specify the Mastodon token in the EVENTS_TOKEN environment variable")
         sys.exit(1)
-    serve(token=os.environ['EVENTS_TOKEN'])
+    if 'API_URL' not in os.environ:
+        print("Please specify the Mastodon server in the API_URL environment variable")
+        sys.exit(1)
+    serve(api_url=os.environ['API_URL'], token=os.environ['EVENTS_TOKEN'])
+
