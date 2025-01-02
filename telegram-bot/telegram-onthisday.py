@@ -12,7 +12,8 @@ import sys
 import time
 import logging
 import subprocess
-from telegram.ext import Updater, CommandHandler
+from telegram import Update
+from telegram.ext import Application, CommandHandler
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -35,7 +36,7 @@ def getEvents(day=None):
     try:
         stdout = stdout.strip()
         stdout = stdout.decode('utf8')
-    except:
+    except Exception:
         return 'uh-oh: something was wrong with the encoding of the events; try again'
     if process.returncode != 0:
         return 'something terrible is happening: exit code: %s, stderr: %s' % (
@@ -45,30 +46,30 @@ def getEvents(day=None):
     return stdout
 
 
-def events(bot, update):
+async def events(update, context):
     day = None
-    txts = bot.message.text.split()
+    txts = update.message.text.split()
     if len(txts) == 2:
         day = txts[1]
     events = getEvents(day)
-    logging.info('%s wants some news; serving:\n%s' % (bot.effective_user.username, events))
-    bot.message.reply_text(events)
+    logging.info('%s wants some news; serving:\n%s' % (update.effective_user.username, events))
+    await update.message.reply_text(events)
 
 
-def about(bot, update):
-    logging.info('%s required more info' % bot.effective_user.username)
-    bot.message.reply_text('See https://github.com/alberanid/onthisday\n\n/today to use the current date\n\n/date 07/30 for July 30')
+async def about(update, context):
+    logging.info('%s required more info' % update.effective_user.username)
+    await update.message.reply_text('See https://github.com/alberanid/onthisday\n\n/today to use the current date\n\n/date 07/30 for July 30')
 
 
 if __name__ == '__main__':
     if 'EVENTS_TOKEN' not in os.environ:
         print("Please specify the Telegram token in the EVENTS_TOKEN environment variable")
     logging.info('start serving very important facts')
-    updater = Updater(os.environ['EVENTS_TOKEN'])
-    updater.dispatcher.add_handler(CommandHandler('today', events, pass_args=True))
-    updater.dispatcher.add_handler(CommandHandler('start', events, pass_args=True))
-    updater.dispatcher.add_handler(CommandHandler('date', events, pass_args=True))
-    updater.dispatcher.add_handler(CommandHandler('about', about))
-    updater.dispatcher.add_handler(CommandHandler('help', about))
-    updater.start_polling()
-    updater.idle()
+    application = Application.builder().token(os.environ['EVENTS_TOKEN']).build()
+
+    application.add_handler(CommandHandler('today', events, has_args=False))
+    application.add_handler(CommandHandler('start', events, has_args=False))
+    application.add_handler(CommandHandler('date', events, has_args=True))
+    application.add_handler(CommandHandler('about', about))
+    application.add_handler(CommandHandler('help', about))
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
